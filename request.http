@@ -10,7 +10,7 @@ Content-Type: application/json
 
 {"brand":"6143e6f71d37095e32c25e45",
 "category":"Air Jordan One",
-"colorway":"Black/White-Light Smoke Grey",
+"colorway":"Black/White-Lights Sdmoke Grey",
 "condition":"New",
 "countryOfManufacture":"CN",
 "description":"The upper of the Air Jordan 1 Shadow 2.0 is made of a black leather base with Light Smoke Grey overlays. A classic Wings logo appears on the lateral ankle wrap while a woven Nike Air label is stitched atop the tongue to complete the look.\n<br>\n<br>\nThe Air Jordan 1 Shadow 2.0 released in May of 2021 and retailed for $170.",
@@ -23,22 +23,23 @@ Content-Type: application/json
 "shoe":"Jordan 1 Retro High",
 "shortDescription":"Air-Jordan-1-Retro-High-Black-White-Light-Smoke-Grey",
 "styleId":"555088-035",
-"title":"Jordan 1 Retro High Shadow 2.0",
-"year":2021,
-"tags":["sneakers","jordan","air jordan","one","release_date|2021-05-15","colorway|black/white-light smoke grey","retail_price|170","style_id|555088-035"]
+"title":"Jordan 1 Retro High Shadow e2.d0",
+"year":2012,
+"tags":["sneakers","jordan","air jordan","one","release_date|2021-05-15","colorway|black/white-light smoke grey","retail_price|170","style_id|555088-035"],
+"test": "hahaa"
 }
 
 ###
 // GET PRODUCT
-GET http://localhost:5000/api/products/6143c26ea9c4f286e4c94cd0
+GET http://localhost:5000/api/products/6143e7141d3709s49
 
 ###
 //UPDATE PRODUCT
-PATCH  http://localhost:5000/api/products/6143c26ea9c4f286e4c94cd0
+PATCH  http://localhost:5000/api/products/6143e7141d37095e32c25e49
 Content-Type: application/json
 
 {
-    "name": "travis",
+    "name": "",
     "retailPrice": 200
 }
 

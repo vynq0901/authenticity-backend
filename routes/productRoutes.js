@@ -1,5 +1,6 @@
 const express = require('express')
 const productController = require('./../controllers/productController')
+const authController = require('../controllers/authController')
 
 const router = express.Router()
 
@@ -10,6 +11,8 @@ router.route('/')
 router.route('/:id')
     .get(productController.getProduct)
     .patch(productController.updateProduct)
-    .delete(productController.deleteProduct)
+    .delete(authController.protect, authController.checkRole('admin'), productController.deleteProduct)
+
+
 
 module.exports = router

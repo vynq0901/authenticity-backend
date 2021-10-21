@@ -1,37 +1,37 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+const slugify = require('slugify')
 
 const productSchema = new Schema({
     brand: {
         type: Schema.Types.ObjectId,
-        ref: 'brand'
+        ref: 'Brand'
     },
-    productCategory: {
-        type: Schema.Types.ObjectId,
-        ref: 'category'
+    name: {
+        type: String,
+        unique: true
     },
-    colorway: {
+    slug: String,
+    styleId: {
         type: String
     },
+    category: {
+        type: Schema.Types.ObjectId,
+        ref: 'Category'
+    },
+    colorway: {
+        type: String,
+    },
+    sizes: [String],
     condition: {
         type: String,
         default: 'New'
     },
     description: {
-        type: String
-    },
-    gender: {
-        type: String
-    },
-    media: {
-        type: Object
-    },
-    hidden: {
-        type: Boolean,
-        default: false
-    },
-    name: {
         type: String,
+    },
+    images: {
+        type: Object
     },
     releaseDate: {
         type: Date,
@@ -39,26 +39,53 @@ const productSchema = new Schema({
     retailPrice: {
         type: Number
     },
-    shoe: {
-        type: String
-    },
-    shortDescription: {
-        type: String
-    },
-    styleId: {
-        type: String
-    },
-    title: {
-        type: String
-    },
     year: {
-        type: Number
+        type: Number,
     },
     tags: {
-        type: Array
+        type: [String]
+    },
+    hidden: {
+        type: Boolean,
+        default: false
     }
+}, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 })
 
+productSchema.index({name: 'text', tags: 'text'})
+
+productSchema.virtual('asks', {
+    ref: 'Ask',
+    foreignField: 'product',
+    localField: '_id',
+    justOne: true
+})
+//create slug
+productSchema.pre('save', function (next) {
+    this.slug = slugify(this.name, { lower: true })
+    next()
+})
+
+//populate brand and category
+productSchema.pre(/^find/, function (next) {
+    this.populate({
+        path: 'brand',
+        select: 'name -_id'
+    }).populate({
+        path: 'category',
+        select: 'name -_id'
+    })
+    next()
+})
+
+// productSchema.virtual('asks', {
+//     ref: 'Ask',
+//     localField: '_id',
+//     foreignField: 'product',
+// })
 const Product = mongoose.model('Product', productSchema)
+
 
 module.exports = Product
