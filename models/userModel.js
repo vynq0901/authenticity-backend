@@ -29,13 +29,20 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'checker', 'handler', 'supporter', 'admin'],
-        default: 'user'
+        enum: ['người dùng', 'nhân viên kiểm tra', 'nhân viên xử lý', 'nhân viên hỗ trợ', 'admin'],
+        default: 'người dùng'
+    },
+    staffCode: {
+        type: String
     },
     level: {
         type: Number,
         enum: [1, 2, 3],
         default: 1,
+    },
+    active: {
+        type: Boolean,
+        default: true
     },
     password: {
         type: String,
@@ -52,6 +59,10 @@ const userSchema = new Schema({
             },
             message: 'Mật khẩu không trùng khớp'
         }
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now()
     },
     followingProducts: [
         {
@@ -87,6 +98,14 @@ userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next()
     this.password = await bcrypt.hash(this.password, 12)
     this.passwordConfirm = undefined
+    if (this.role !== 'nguời dùng') {
+        this.followingProducts = undefined
+        this.level = undefined
+        this.shoeSize = undefined
+        if (this.role === 'nhân viên xử lý') this.staffCode = 'HANDLER' + this._id.toString().slice(-6).toUpperCase()
+        if (this.role === 'nhân viên kiểm tra') this.staffCode = 'CHECKER' + this._id.toString().slice(-6).toUpperCase()
+        if (this.role === 'nhân viên hỗ trợ') this.staffCode = 'HELPER' + this._id.toString().slice(-6).toUpperCase()
+    }
     next()
 })
 

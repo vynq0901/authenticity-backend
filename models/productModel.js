@@ -56,12 +56,7 @@ const productSchema = new Schema({
 
 productSchema.index({name: 'text', tags: 'text'})
 
-productSchema.virtual('asks', {
-    ref: 'Ask',
-    foreignField: 'product',
-    localField: '_id',
-    justOne: true
-})
+
 //create slug
 productSchema.pre('save', function (next) {
     this.slug = slugify(this.name, { lower: true })
@@ -80,6 +75,11 @@ productSchema.pre(/^find/, function (next) {
     next()
 })
 
+// productSchema.virtual('brands', {
+//     ref: 'Brand',
+//     foreignField: '_id',
+//     localField: 'brand',
+// })
 // productSchema.virtual('asks', {
 //     ref: 'Ask',
 //     localField: '_id',

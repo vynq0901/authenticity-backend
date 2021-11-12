@@ -7,6 +7,7 @@ const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 
 exports.getAllProducts = catchAsync(async (req, res, next) => {
+    
     const page = req.query.page * 1 || 1
     const limit = 36
     const skip = (page - 1) * limit
@@ -29,7 +30,8 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
     //     { $match: { product: product._id, isMatched: false } },
     //     { $group: { _id: '$productSize', highestPrice: { $max: '$price' }, "bidDetail": { "$first": "$$ROOT" } } }
     // ])
-    const query = Product.find(filter).sort({ releaseDate: 'desc' }).skip(skip).limit(limit)
+    
+    const query = Product.find(filter).sort({ createdAt: 'desc' }).skip(skip).limit(limit)
     const products = await query
     let results = []
     for (const product of products) {
@@ -51,6 +53,7 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
             name: product.name,
             images: product.images,
             slug: product.slug,
+            asks: product.asks,
             averagePrice: avgAsk
         })
     }
@@ -74,11 +77,7 @@ exports.createProduct = catchAsync(async (req, res, next) => {
     res.status(201).json({
         status: 'success',
         message: 'Product created !',
-        data: {
-            totalProduct,
-            page,
-            product: newProduct
-        }
+        product: newProduct
     })
 })
 
@@ -111,7 +110,7 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
 })
 
 exports.deleteProduct = catchAsync(async (req, res, next) => {
-    const deletedProduct = await Product.findOneAndDelete(req.params.id)
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id)
     if (!deletedProduct) {
         return next(new AppError('No product found', 404))
     }

@@ -50,10 +50,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
     if (!user || !(await user.correctPassword(password, user.password))) {
         return next(new AppError('Tài khoản hoặc mật khẩu không đúng', 401))
-        // return res.status(400).json({
-        //     status: 'failed',
-        //     message: 'Tài khoản hoặc mật khẩu không đúng'
-        // })
+     
     }
     const shippingInfo = await ShippingInfo.findOne({ user })
     // if everything ok, send token to client

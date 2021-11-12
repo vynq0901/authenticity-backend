@@ -4,7 +4,7 @@ const authController = require('../controllers/authController')
 
 const router = express.Router()
 
-router.route('/').post(authController.protect, authController.checkRole('user'), askController.createAsk)
+router.route('/').post(authController.protect, authController.checkRole('người dùng'), askController.createAsk)
 router.route('/delete/:id').delete(askController.deleteAsk)
 router.route('/:productId').get(askController.getProductAsks)
 

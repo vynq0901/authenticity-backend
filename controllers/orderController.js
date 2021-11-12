@@ -4,6 +4,7 @@ const Ask = require('../models/askModel')
 const ShippingInfo = require('../models/shippingInfoModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
+const sendEmail = require('../utils/sendEmail')
 
 exports.createOrder = catchAsync(async (req, res) => {
     let bid, ask
@@ -56,9 +57,20 @@ exports.createOrder = catchAsync(async (req, res) => {
         bid,
         product: req.body.product,
         productSize: req.body.productSize,
-        salePrice: bid.price
+        salePrice: bid.price,
+        profit: (bid.totalPrice - bid.price).toFixed(2) + (ask.price - ask.totalPrice).toFixed(2)
     })
     order.save()
+    sendEmail(bid.user.email, 'Thông báo mua sản phẩm', 'buysuccess', {
+        productName: req.body.product.name,
+        orderNumber: `${bid._id.toString().slice(-6)}-${ask._id.toString().slice(-6)}`.toUpperCase(),
+        imgPath: req.body.product.images.imageUrl
+    })
+    sendEmail(ask.user.email, 'Thông báo bán sản phẩm', 'sellsuccess', {
+        productName: req.body.product.name,
+        orderNumber: `${bid._id.toString().slice(-6)}-${ask._id.toString().slice(-6)}`.toUpperCase(),
+        imgPath: req.body.product.images.imageUrl
+    })
     res.status(201).json({
         status: 'success',
         message: 'Order Created!',
@@ -80,10 +92,17 @@ exports.findOrder = catchAsync(async (req, res) => {
 })
 
 exports.updateOrder = catchAsync(async (req, res, next) => {
-    const order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status, updatedAt: Date.now() }, { new: true })
+    const user = req.user
+    let order
+    if (req.body.status === 'đã kiểm tra' || req.body.status === 'đã hủy') {
+        order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status, updatedAt: Date.now(), checkedBy: user, updatedBy: user }, { new: true })
+    }
+    order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status, updatedAt: Date.now(), updatedBy: user }, { new: true }).populate('bid ask')
+    console.log(order)
     if (!order) {
         return next(new AppError('Order not found', 404))
     }
+    // if (order.status === 'đã tiếp nhận') sendEmail(order.bid)
     res.status(200).json({
         status: 'success',
         message: 'Order Updated',

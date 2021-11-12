@@ -20,7 +20,7 @@ const orderSchema = new Schema({
     salePrice: {
         type: Number
     },
-    totalPrice: {
+    profit: {
         type: Number
     },
     orderNumber: {
@@ -28,8 +28,8 @@ const orderSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['Người bán đang gửi hàng', 'Đang xử lý', 'Đã gửi hàng', 'Hoàn thành', 'Đã hủy'],
-        default: 'Người bán đang gửi hàng'
+        enum: ['người bán đang gửi hàng', 'đã tiếp nhận', 'đang kiểm tra', 'đã kiểm tra', 'đã gửi hàng', 'hoàn thành', 'đã hủy'],
+        default: 'người bán đang gửi hàng'
     },
     createdAt: {
         type: Date,
@@ -37,11 +37,19 @@ const orderSchema = new Schema({
     },
     updatedAt: {
         type: Date,
+    },
+    checkedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    updatedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
     }
 })
+orderSchema.index({status: 'text'})
 orderSchema.pre('save', function (next) {
     this.orderNumber = `${this.bid._id.toString().slice(-6)}-${this.ask._id.toString().slice(-6)}`.toUpperCase()
-
     next()
 })
 

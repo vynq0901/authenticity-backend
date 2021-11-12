@@ -29,6 +29,34 @@ exports.getProductDetail = catchAsync(async (req, res, next) => {
     })
 })
 
+exports.getSizeLastSale = catchAsync(async (req, res) => {
+    const {product, size} = req.params
+    const lastSale = await Order.findOne({product: product, productSize: size, status: 'hoàn thành'}).sort({'createdAt': -1})
+    res.status(200).json({
+        lastSale: lastSale ? lastSale.salePrice : null
+    })
+})
+exports.getSizeAllSale = catchAsync(async (req, res) => {
+    const {product, size} = req.params
+    const sales = await Order.find({product: product, productSize: size, status: 'hoàn thành'}).sort({'createdAt': -1})
+    res.status(200).json({
+        sales
+    })
+})
+exports.getSizeAllAsk = catchAsync(async (req, res) => {
+    const {product, size} = req.params
+    const asks = await Ask.find({product: product, productSize: size, isMatched: false}).sort({'createdAt': -1})
+    res.status(200).json({
+        asks
+    })
+})
+exports.getSizeAllBid = catchAsync(async (req, res) => {
+    const {product, size} = req.params
+    const bids = await Bid.find({product: product, productSize: size, isMatched: false}).sort({'createdAt': -1})
+    res.status(200).json({
+        bids
+    })
+})
 exports.getAskAndBid = catchAsync(async (req, res, next) => {
     const { slug } = req.params
     const { size } = req.query
@@ -47,7 +75,20 @@ exports.getAskAndBid = catchAsync(async (req, res, next) => {
 })
 
 exports.getUserOrders = catchAsync(async (req, res, next) => {
-    const user = req.user2
+    const user = req.user
+  
+    const bids = await Bid.find({user: user, isMatched: true})
+    const ids = bids.map(bid => bid._id)
+    
+   const orders = await Order.find({bid: {$in: ids}, status: 'hoàn thành'}).populate('bid')
+   const total = orders.reduce((sum, curr) => sum + curr.salePrice, 0)
+    res.status(200).json({
+        status: 'success',
+        orders: {
+            count: orders.length,
+            sum: total
+        }
+    })
 })
 
 exports.getUserBids = catchAsync(async (req, res, next) => {
@@ -82,7 +123,7 @@ exports.getBuyingPending = catchAsync(async (req, res, next) => {
     const bids = await Bid.find({ user: req.params.userId, isMatched: true })
     let orders = []
     for (const bid of bids) {
-        const order = await Order.findOne({ bid: bid, status: { '$in': ['Người bán đang gửi hàng', 'Đang xử lý', 'Đã gửi hàng'] } }).populate({ path: 'bid', select: '+price' })
+        const order = await Order.findOne({ bid: bid, status: { '$in': ['người bán đang gửi hàng', 'đang xử lý', 'đã gửi hàng'] } }).populate({ path: 'bid', select: '+price' })
         if (order) {
             orders.push({
                 orderId: order.Id,
@@ -110,7 +151,7 @@ exports.getBuyingHistory = catchAsync(async (req, res, next) => {
 
     let orders = []
     for (const bid of bids) {
-        const order = await Order.findOne({ bid: bid, status: { '$in': ['Hoàn thành', 'Đã hủy'] } }).populate({ path: 'bid', select: '+price' })
+        const order = await Order.findOne({ bid: bid, status: { '$in': ['hoàn thành', 'đã hủy'] } }).populate({ path: 'bid', select: '+price' })
         if (order) {
             orders.push({
                 orderId: order.Id,
@@ -167,7 +208,7 @@ exports.getAskingPending = catchAsync(async (req, res, next) => {
 
     let orders = []
     for (const ask of asks) {
-        const order = await Order.findOne({ ask: ask, status: { '$in': ['Người bán đang gửi hàng', 'Đang xử lý', 'Đã gửi hàng'] } }).populate({ path: 'ask', select: '+price' })
+        const order = await Order.findOne({ ask: ask, status: { '$in': ['người bán đang gửi hàng', 'đang xử lý', 'đã gửi hàng'] } }).populate({ path: 'ask', select: '+price' })
         if (order) {
             orders.push({
                 orderId: order.id,
@@ -195,7 +236,7 @@ exports.getAskingHistory = catchAsync(async (req, res, next) => {
 
     let orders = []
     for (const ask of asks) {
-        const order = await Order.findOne({ ask: ask, status: { '$in': ['Hoàn thành', 'Đã hủy'] } }).populate({ path: 'ask', select: '+price' })
+        const order = await Order.findOne({ ask: ask, status: { '$in': ['hoàn thành', 'đã hủy'] } }).populate({ path: 'ask', select: '+price' })
         if (order) {
             orders.push({
                 orderId: order.Id,
@@ -220,7 +261,7 @@ exports.getAskingHistory = catchAsync(async (req, res, next) => {
 
 exports.getNewestSneakers = catchAsync(async (req, res, next) => {
     const category = await Category.findOne({ name: 'sneakers' })
-    const products = await Product.find({ category: category }).sort({ releaseDate: 'desc' }).limit(5)
+    const products = await Product.find({ category: category }).sort({ createdAt: 'desc' }).limit(5)
     res.status(200).json({
         status: 'success',
         data: products
@@ -228,7 +269,7 @@ exports.getNewestSneakers = catchAsync(async (req, res, next) => {
 })
 exports.getNewestStreetwear = catchAsync(async (req, res, next) => {
     const category = await Category.findOne({ name: 'streetwear' })
-    const products = await Product.find({ category: category }).sort({ releaseDate: 'desc' }).limit(5)
+    const products = await Product.find({ category: category }).sort({ createdAt: 'desc' }).limit(5)
     res.status(200).json({
         status: 'success',
         data: products
@@ -257,11 +298,11 @@ exports.addFollowingProduct = catchAsync(async (req, res, next) => {
     const {productId, size} = req.body
     const product = await Product.findById(productId)
     const user = await User.findById(req.user._id)
-
+    console.log(req.user)
+    if (!user) return next(new AppError('Vui lòng đăng nhập !', 400))
     const newArr = [...user.followingProducts, {product, size}]
     const updatedUser = await User.findByIdAndUpdate(user._id, {followingProducts: newArr}, {new: true})
   
-    console.log(updatedUser)
     res.status(200).json({
         status: 'success',
         message: 'Add successful',
@@ -275,7 +316,7 @@ exports.getFollowingProducts = catchAsync(async (req, res, next) => {
     const results = []
     for (a of arr) {
         const lowestAsk = await Ask.find({ product: a.product, productSize: a.size, isMatched: false, expireDate: {$gt: Date.now()} }).sort([['price', 'ascending']])
-        const lastSale = await Order.find({product: a.product, productSize: a.size, status: 'Hoàn thành'}).sort({salePrice: -1}).limit(1)
+        const lastSale = await Order.find({product: a.product, productSize: a.size, status: 'hoàn thành'}).sort({salePrice: -1}).limit(1)
         results.push({
             followingId: a._id,
             productName: a.product.name,
@@ -296,6 +337,7 @@ exports.deleteFollowingProduct = catchAsync(async (req, res, next) => {
     const arr = req.user.followingProducts
     const newArr = arr.filter(a => a._id.toString() !== req.params.followingId)
     const updatedUser = await User.findByIdAndUpdate(req.user._id, {followingProducts: newArr}, {new: true})
+    console.log(updatedUser.followingProducts)
     res.status(200).json({
         status: 'success',
         updatedFollowing: updatedUser.followingProducts

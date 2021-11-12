@@ -57,7 +57,7 @@ const handleJWTExpired = err => {
 
 
 const handleJWTError = err => {
-    return new AppError('Invalid Token. Please log in again', 401)
+    return new AppError('Vui lòng đăng nhập lại', 401)
 }
 
 module.exports = ((err, req, res, next) => {
