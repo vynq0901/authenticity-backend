@@ -13,6 +13,8 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.1",
@@ -27,8 +29,6 @@
     "validator": "^13.6.0"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
-    "dotenv": "^10.0.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-node": "^4.1.0",
