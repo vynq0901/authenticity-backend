@@ -18,7 +18,7 @@ let admin
 const server = http.createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: '*',
+        origin: 'https://authenticity-fend.herokuapp.com',
         methods: ['GET', 'POST'],
         allowedHeaders: [
             "Access-Control-Allow-Origin",
