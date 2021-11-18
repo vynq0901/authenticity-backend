@@ -5,6 +5,7 @@ const ShippingInfo = require('../models/shippingInfoModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 const sendEmail = require('../utils/sendEmail')
+const stripe = require("stripe")(process.env.STRIPE_SK)
 
 exports.createOrder = catchAsync(async (req, res) => {
     let bid, ask
@@ -58,8 +59,9 @@ exports.createOrder = catchAsync(async (req, res) => {
         product: req.body.product,
         productSize: req.body.productSize,
         salePrice: bid.price,
-        profit: (bid.totalPrice - bid.price).toFixed(2) + (ask.price - ask.totalPrice).toFixed(2)
+        profit: (parseFloat(bid.totalPrice - bid.price) + parseFloat(ask.price - ask.totalPrice)).toFixed(2)
     })
+    
     order.save()
     sendEmail(bid.user.email, 'Thông báo mua sản phẩm', 'buysuccess', {
         productName: req.body.product.name,

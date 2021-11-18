@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 const app = require('./app')
-const cors = require('cors')
 const http = require('http')
 const {Server} = require('socket.io')
 dotenv.config({ path: './config.env' })
+
 
 const DB = process.env.DATABASE.replace('<password>', process.env.DATABASE_PASSWORD)
 
@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
     }) 
     socket.on("send_message", (data) => {   
         socket.to(data.room).emit("receive_message", data)
-        console.log(data)
+     
      rooms.map(r => {
             if (r.room === data.room) {
                 r.messages.push({message: data.message, isAdmin: data.isAdmin, time: data.time})
@@ -72,12 +72,18 @@ io.on('connection', (socket) => {
     socket.on("admin_join_room", (data) => {
         socket.join(data.room)
     })
+    socket.on("change_room", (data) => {
+        console.log(data)
+        const newRoom = rooms.find(r => r.userSocketId === data.userSocketId)
+        io.to(admin.adminSocketId).emit('receive_new_room', newRoom)
+    })
     socket.on('disconnect', () => {
         console.log('User Disconnect', socket.id)
         const newRooms = rooms.filter(r => r.userSocketId !== socket.id)
         rooms = newRooms
         if (admin) {
             io.to(admin.adminSocketId).emit('update_users', newRooms)
+            io.to(admin.adminSocketId).emit('user_disconnect', socket.id)
         }
     })
 

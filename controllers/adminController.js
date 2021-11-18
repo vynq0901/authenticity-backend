@@ -26,9 +26,21 @@ exports.getCategoriesAndBrands = catchAsync(async (req, res) => {
 })
 
 exports.getAllProducts = catchAsync(async (req, res) => {
-    const products = await Product.find()
+    // const products = await Product.find()
+    // res.status(200).json({
+    //     status: 'success',
+    //     products
+    // })
+    const kw = req.query.s
+    console.log(kw)
+    let products
+    if (kw !== '') {
+        products = await Product.find({$text : { $search: kw }}).populate('category brand').select('category brand name id colorway slug images')
+    } else {
+        products = await Product.find().sort({'createdAt': -1})
+    }
+    
     res.status(200).json({
-        status: 'success',
         products
     })
 })

@@ -21,7 +21,7 @@ exports.createNews = catchAsync(async (req, res, next) => {
 })
 
 exports.getAllNews = catchAsync(async (req, res, next) => {
-    const newses = await News.find().populate('createdBy')
+    const newses = await News.find().sort({createdAt: -1}).populate('createdBy')
     res.status(200).json({
         status: 'success',
         newses

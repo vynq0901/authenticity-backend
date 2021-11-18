@@ -109,6 +109,7 @@ userSchema.pre('save', async function (next) {
     next()
 })
 
+userSchema.index({name: 'text', staffCode: 'text'})
 //check password in log in
 userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
     return await bcrypt.compare(candidatePassword, userPassword)

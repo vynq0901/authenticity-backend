@@ -11,6 +11,9 @@ const productSchema = new Schema({
         type: String,
         unique: true
     },
+    productCode: {
+        type: String,
+    },
     slug: String,
     styleId: {
         type: String
@@ -54,7 +57,7 @@ const productSchema = new Schema({
     toObject: { virtuals: true }
 })
 
-productSchema.index({name: 'text', tags: 'text'})
+productSchema.index({name: 'text', tags: 'text', productCode: 'text'})
 
 
 //create slug

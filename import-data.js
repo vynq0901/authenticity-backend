@@ -17,18 +17,9 @@ mongoose.connect(DB, {
 // const products = JSON.parse(fs.readFileSync('./data/collectibles.json', 'utf-8'))
 
 
-const importField = async () => {
-    try {
-        const allProducts = await Product.find()
-    
-    for (const product of allProducts) {
-        const updateCode = product._id.toString().slice(-10).toUpperCase()
-        await Product.updateMany({_id: product._id}, {$set: {productCode: updateCode}} , {upsert: true})
-        console.log(product._id.toString())
-    }
-    } catch (error) {
-        console.log(error)
-    }
+const addField = () => {
+    Product.createIndexes({productCode: 'text'})
+    console.log('done')
 }
 
 // const importData = async () => {
@@ -70,8 +61,8 @@ const importField = async () => {
 //         console.log(error)
 //     }
 // }
+addField()
 
-importField()
 // deleteData()
 // importData()
 //
