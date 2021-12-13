@@ -100,11 +100,26 @@ exports.updateOrder = catchAsync(async (req, res, next) => {
         order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status, updatedAt: Date.now(), checkedBy: user, updatedBy: user }, { new: true })
     }
     order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status, updatedAt: Date.now(), updatedBy: user }, { new: true }).populate('bid ask')
-    console.log(order)
+    
     if (!order) {
         return next(new AppError('Order not found', 404))
     }
-    // if (order.status === 'đã tiếp nhận') sendEmail(order.bid)
+   
+    console.log(order)
+    if (order.status === 'đã hủy') {
+        const bid = await Bid.findByIdAndUpdate(order.bid._id, {isMatched: false}, {new: true})
+        const ask = await Ask.findByIdAndDelete(order.ask._id)
+        sendEmail(order.bid.user.email, 'Thông báo hủy đơn hàng', 'buyerCancel', {
+            productName: order.product.name,
+            orderNumber: order.orderNumber,
+            imgPath: order.product.images.imageUrl
+        })
+        sendEmail(order.ask.user.email, 'Thông báo hủy đơn hàng', 'sellerCancel', {
+            productName: order.product.name,
+            orderNumber: order.orderNumber,
+            imgPath: order.product.images.imageUrl
+        })
+    }
     res.status(200).json({
         status: 'success',
         message: 'Order Updated',

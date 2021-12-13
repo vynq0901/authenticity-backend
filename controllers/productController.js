@@ -7,7 +7,7 @@ const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 
 exports.getAllProducts = catchAsync(async (req, res, next) => {
-    
+    console.log(req.query)
     const page = req.query.page * 1 || 1
     const limit = 36
     const skip = (page - 1) * limit
@@ -82,6 +82,7 @@ exports.createProduct = catchAsync(async (req, res, next) => {
 })
 
 exports.getProduct = catchAsync(async (req, res, next) => {
+    console.log(1232323)
     const product = await Product.findById(req.params.id)
     if (!product) {
         return next(new AppError('No product found', 404))
@@ -107,6 +108,7 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
             product: updatedProduct
         }
     })
+    console.log('haha')
 })
 
 exports.deleteProduct = catchAsync(async (req, res, next) => {

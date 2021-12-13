@@ -7,6 +7,7 @@ const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 const User = require('../models/userModel')
 exports.getProductDetail = catchAsync(async (req, res, next) => {
+    
     const product = await Product.findOne({ slug: req.params.slug })
     if (!product) {
         return next(new AppError('Product not found!', 404))
@@ -27,6 +28,7 @@ exports.getProductDetail = catchAsync(async (req, res, next) => {
         lowestAsks,
         highestBids
     })
+   
 })
 
 exports.getSizeLastSale = catchAsync(async (req, res) => {

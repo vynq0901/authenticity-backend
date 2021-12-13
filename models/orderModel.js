@@ -52,6 +52,12 @@ orderSchema.pre('save', function (next) {
     this.orderNumber = `${this.bid._id.toString().slice(-6)}-${this.ask._id.toString().slice(-6)}`.toUpperCase()
     next()
 })
-
+orderSchema.pre(/^find/, function (next) {
+    this.populate({
+        path: 'product',
+        select: 'name images'
+    })
+    next()
+})
 const Order = mongoose.model('Order', orderSchema)
 module.exports = Order
